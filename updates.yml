@@ -1,0 +1,13 @@
+---
+
+- hosts: debian-based
+  become: yes
+  tasks:
+    - name: Install Updates
+      apt:
+        name: "*"
+#        upgrade: safe
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+        force_apt_get: yes
