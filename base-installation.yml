@@ -1,0 +1,13 @@
+---
+
+- hosts: windows
+  tasks:
+    - name: Check chocolatey installation
+      win_command: 'powershell -Command "& { [bool](Get-Command -Name choco -ErrorAction SilentlyContinue) }"'
+      register: choco
+    - name: Install chocolatey
+      win_command: 'powershell.exe -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString(\"https://chocolatey.org/install.ps1\"))"'
+      when: choco.stdout == 'False\r\n'
+    - name: Install Packages
+      win_chocolatey:
+        name: "{{ choco_packages }}"
