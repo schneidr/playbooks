@@ -3,11 +3,48 @@
 - hosts: debian-based
   become: yes
   tasks:
-    - name: Install Updates
-      apt:
-        name: "*"
-#        upgrade: safe
-        state: latest
-        update_cache: yes
-        cache_valid_time: 3600
-        force_apt_get: yes
+  - name: Install Updates
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+      cache_valid_time: 3600
+      force_apt_get: yes
+      autoremove: yes
+      autoclean: yes
+    tags: update
+  - name: Find installed and updated packages
+    shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log |cut -d " " -f 3-5
+    register: result
+    changed_when: result.stdout != ""
+    tags: update
+  - name: List updated packages
+    debug: msg="{{ result.stdout_lines }}"
+    when: result.stdout != ""
+    tags: update
+  - name: Check for outstanding reboot
+    stat:
+      path: /var/run/reboot-required
+      get_checksum: no
+      get_mime: no
+    register: r
+    changed_when: r.stat.exists
+    tags: check-reboot
+  - name: Report reboot
+    debug: msg="Reboot required"
+    changed_when: r.stat.exists
+    when: r.stat.exists
+    tags: check-reboot
+
+- hosts: windows
+  tasks:
+  - name: Install all updates
+    win_updates:
+      category_names:
+        - Application
+        - CriticalUpdates
+        - DefinitionUpdates
+        - SecurityUpdates
+        - Updates
+      reboot: "yes"
+    tags: update

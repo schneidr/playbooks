@@ -14,7 +14,7 @@ The result will look like this:
               3962383339373731610a316362326239386539633638646331636633333330633231383730323634
               33653332353239353662366631373037653135303163663365633532643535663933
 
-Copy this entry into the host variable file.
+Copy this entry into the host variable file. Make sure you use the same vault password for all password entries.
 
 Run the playbook with
 
